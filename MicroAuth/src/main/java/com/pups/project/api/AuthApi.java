@@ -1,13 +1,11 @@
 package com.pups.project.api;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,12 +19,12 @@ import com.pups.project.jwt.JWTUtility;
 @RestController
 public class AuthApi {
 	
-	String customersAPIbase="http://localhost:8080/api/customers"; 	//API base
-	JWTUtility jwtUtility = new JWTUtility(); 						//JWTUtility used to create a token
-	RestTemplate restTemplate =new RestTemplate(); 					//RestTemplate used to make HTTP GET and POST requests
-	String customerAllowedScopes = "/api/customers /api/events /api/registrations";
+	private String customersAPIbase="http://localhost:8080/api/customers"; 	//API base
+	private JWTUtility jwtUtility = new JWTUtility(); 						//JWTUtility used to create a token
+	private RestTemplate restTemplate = new RestTemplate(); 				//RestTemplate used to make HTTP GET and POST requests
+	private String customerAllowedScopes = "/api/customers /api/events /api/registrations";
 	
-	@PostMapping(path = "/token", consumes = "application/json")
+	@PostMapping(path = "/token")
 	public ResponseEntity<?> authenticateCredentials(@RequestBody(required = false) CustomerCredentials credentials) {
 		
 		//Check validity of provided data
@@ -35,7 +33,16 @@ public class AuthApi {
 		}
 		
 		//Make a request to the database for all customers and cast the list as an array of CustomerCredentials
-		CustomerCredentials[] customers=restTemplate.getForObject(customersAPIbase,CustomerCredentials[].class);
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setBearerAuth(jwtUtility.createToken("/api/customers"));
+	    
+	    // build the request
+	    HttpEntity<?> entity = new HttpEntity<>(headers);
+		
+		ResponseEntity<?> customerResponse=restTemplate.exchange(customersAPIbase, HttpMethod.GET, entity,CustomerCredentials[].class);
+		
+		
+		CustomerCredentials[] customers = (CustomerCredentials[]) customerResponse.getBody();
 		
 		//Do a foreach loop on the customers array to check if the provided credentials match any of the customer credentials
 		for(CustomerCredentials checking:customers) {
@@ -43,7 +50,9 @@ public class AuthApi {
 				
 				//CREDENTIAL CHECK SUCCEEDS, generate and return a token
 				String token = jwtUtility.createToken(customerAllowedScopes);
-				ResponseEntity<?> response = ResponseEntity.ok(token);
+				HashMap<String, String> tokenJson = new HashMap<String, String>();
+				tokenJson.put("token",token);
+				ResponseEntity<?> response = ResponseEntity.ok(tokenJson);
 				return response;
 			}
 		}
@@ -52,7 +61,7 @@ public class AuthApi {
 		return (ResponseEntity<?>) ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 	}
 	
-	@PostMapping(path = "/register", consumes = "application/json")
+	@PostMapping(path = "/register")
 	public ResponseEntity<?> registerUser(@RequestBody(required=false) CustomerInformation information){
 		
 		//Check validity of provided information
@@ -62,13 +71,14 @@ public class AuthApi {
 		
 	    // create header
 	    HttpHeaders headers = new HttpHeaders();
-
+	    headers.setBearerAuth(jwtUtility.createToken("/api/customers"));
+	    
 	    // build the request
 	    HttpEntity<?> entity = new HttpEntity<>(information, headers);
-
+	    
 	    // send POST request
 	    ResponseEntity<?> response = this.restTemplate.postForEntity(customersAPIbase, entity, CustomerInformation.class);
-
+	    
 	    // check response status code
 	    if (response.getStatusCode() == HttpStatus.CREATED) {
 	        return (ResponseEntity<?>) response.getBody();

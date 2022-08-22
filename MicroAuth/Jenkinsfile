@@ -4,11 +4,11 @@ node {
     }
     
     stage('Gradle Build - Authservice') {
-        sh 'gradle -b MicroAuth/gradle.build build -x test'
+        sh 'gradle -b MicroAuth/build.gradle build -x test'
     }
     
     stage ('Gradle Bootjar - Package - Authservice'){
-        sh 'gradle -b MicroAuth/gradle.build bootjar'
+        sh 'gradle -b MicroAuth/build.gradle bootjar'
     }
     
     stage ('User Acceptance Test - Authservice'){
@@ -18,7 +18,7 @@ node {
     	
     	if(response=='Yes') {
     		stage('Release - Authservice') {
-    			sh 'gradle -b MicroAuth/gradle.build build'
+    			sh 'gradle -b MicroAuth/build.gradle build'
     		}
     	}
     }

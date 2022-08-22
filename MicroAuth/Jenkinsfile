@@ -1,6 +1,6 @@
 node {
     stage('Checkout - Authservice') {
-        git branch: 'main', url: 'https://github.com/Lunatunny/MicroDatabase.git'
+        git branch: 'main', url: 'https://github.com/Lunatunny/MicroAuth.git'
     }
     
     stage('Gradle Build - Authservice') {

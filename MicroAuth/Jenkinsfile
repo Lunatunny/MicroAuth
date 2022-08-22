@@ -1,0 +1,25 @@
+node {
+    stage('Checkout - Authservice') {
+        git url: 'https://github.com/Lunatunny/MicroAuth'
+    }
+    
+    stage('Gradle Build - Authservice') {
+        bat 'gradle build -x test'
+    }
+    
+    stage ('Gradle Bootjar - Package - Authservice'){
+        bat 'gradle bootjar'
+    }
+    
+    stage ('User Acceptance Test - Authservice'){
+    	def response = input message: 'Is this build good for release?',
+    	parameters: [choice(choices: 'Yes\nNo',
+    	description: '', name: 'Pass')]
+    	
+    	if(response=='Yes') {
+    		stage('Release - Authservice') {
+    			bat 'gradle build'
+    		}
+    	}
+    }
+}

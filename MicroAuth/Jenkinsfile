@@ -1,6 +1,6 @@
 node {
     stage('Checkout - Authservice') {
-        checkout scm
+        git branch: 'main', url: 'https://github.com/Lunatunny/MicroDatabase.git'
     }
     
     stage('Gradle Build - Authservice') {

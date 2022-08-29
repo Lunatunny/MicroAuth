@@ -19,13 +19,16 @@ import com.pups.project.jwt.JWTUtility;
 @RestController
 public class AuthApi {
 	
-	private String customersAPIbase="http://localhost:8080/api/customers"; 	//API base
+	private String apiHost = System.getenv("API_HOST");
+	private String customersAPIbase="http://"+apiHost+"/api/customers"; 	//API base
 	private JWTUtility jwtUtility = new JWTUtility(); 						//JWTUtility used to create a token
 	private RestTemplate restTemplate = new RestTemplate(); 				//RestTemplate used to make HTTP GET and POST requests
 	private String customerAllowedScopes = "/api/customers /api/events /api/registrations";
-	
+		
 	@PostMapping(path = "/token")
 	public ResponseEntity<?> authenticateCredentials(@RequestBody(required = false) CustomerCredentials credentials) {
+		
+		System.out.print("asking at "+apiHost);
 		
 		//Check validity of provided data
 		if(credentials.getName()==null || credentials.getPassword()==null || credentials.getName().length()==0 || credentials.getPassword().length()==0) {

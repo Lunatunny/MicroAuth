@@ -4,11 +4,11 @@ node {
     }
 
     stage ("Gradle Build - AuthApi") {
-        sh 'gradle clean build -b ./MicroAuth'
+        sh 'gradle clean build -b ./MicroAuth/build.gradle'
     }
     
     stage ("Gradle Bootjar-Package - AuthApi") {
-        sh 'gradle bootjar -b ./MicroAuth'
+        sh 'gradle bootjar -b ./MicroAuth/build.gradle'
     }
     
     stage ("Containerize the app-docker build - AuthApi") {

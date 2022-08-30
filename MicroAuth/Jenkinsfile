@@ -21,8 +21,9 @@ node {
     }
     
     stage ("Run Docker container instance - AuthApi"){
-        sh "docker run -d --rm --name jenkins-auth -p 8081:8081 jenkins-auth:v1.0"
-     }
+        sh "docker stop jenkins-auth || true"
+	sh "docker run -d --rm --name jenkins-auth -p 8081:8081 jenkins-auth:v1.0"
+    }
     
     stage('User Acceptance Test - AuthApi') {
 	
@@ -31,10 +32,24 @@ node {
 	   description: '', name: 'Pass')]
 	
 	  if(response=="Yes") {
-	    stage('Deploy to Kubenetes cluster - AuthApi') {
+	      stage("Get DATA Kubernetes IP") {
+
+            
+                script {
+                def userInput = input(
+                 id: 'userInput', message: 'Enter the Kubernetes IP of the DATA SERVICE', 
+                 parameters: [
+                 [$class: 'TextParameterDefinition', defaultValue: '0.0.0.0:0000', description: 'IP of DATA SERVICE in Kubernetes', name: 'API_HOST']
+                ])
+                echo ("Dataservice IP: "+userInput['API_HOST'])
+
+                }
+            
+             }
+		stage('Deploy to Kubenetes cluster - AuthApi') {
 	      sh "kubectl create deployment jenkins-auth --image=jenkins-auth:v1.0"
 		//get the value of API_HOST from kubernetes services and set the env variable
-	      sh "kubectl set env deployment/jenkins-auth API_HOST=10.98.183.52:8080"
+	      sh "kubectl set env deployment/jenkins-auth API_HOST="+userInput['API_HOST']
 	      sh "kubectl expose deployment jenkins-auth --type=LoadBalancer --port=8081"
 	    }
 	  }

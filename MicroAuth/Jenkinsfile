@@ -1,25 +1,48 @@
 node {
-    stage('Checkout - Authservice') {
-        git branch: 'main', url: 'https://github.com/Lunatunny/MicroAuth.git'
+    stage ("Checkout AuthApi"){
+        git branch: 'main', url: ' https://github.com/foxwas/bahmsdfox-msdauthservice'
+    }
+
+    stage ("Gradle Build - AuthApi") {
+        sh 'gradle clean build -b ./Micro'
     }
     
-    stage('Gradle Build - Authservice') {
-        sh 'gradle -b MicroAuth/build.gradle build -x test'
+    stage ("Gradle Bootjar-Package - AuthApi") {
+        sh 'gradle bootjar -b ./Micro'
     }
     
-    stage ('Gradle Bootjar - Package - Authservice'){
-        sh 'gradle -b MicroAuth/build.gradle bootjar'
+    stage ("Containerize the app-docker build - AuthApi") {
+        sh 'docker build --rm -t jenkins-auth:v1.0 .'
     }
     
-    stage ('User Acceptance Test - Authservice'){
-    	def response = input message: 'Is this build good for release?',
-    	parameters: [choice(choices: 'Yes\nNo',
-    	description: '', name: 'Pass')]
-    	
-    	if(response=='Yes') {
-    		stage('Release - Authservice') {
-    			sh 'gradle -b MicroAuth/build.gradle build'
-    		}
-    	}
+    stage ("Inspect the docker image - AuthApi"){
+        sh "docker images jenkins-auth:v1.0"
+        sh "docker inspect jenkins-auth:v1.0"
+    }
+    
+    stage ("Run Docker container instance - AuthApi"){
+        sh "docker run -d --rm --name jenkins-auth -p 8081:8081 jenkins-auth:v1.0"
+     }
+    
+    stage('User Acceptance Test - AuthApi') {
+	
+	  def response= input message: 'Is this build good to go?',
+	   parameters: [choice(choices: 'Yes\nNo', 
+	   description: '', name: 'Pass')]
+	
+	  if(response=="Yes") {
+	    stage('Deploy to Kubenetes cluster - AuthApi') {
+	      sh "kubectl create deployment jenkins-auth --image=jenkins-auth:v1.0"
+		//get the value of API_HOST from kubernetes services and set the env variable
+	      sh "kubectl set env deployment/jenkins-auth API_HOST=10.98.183.52:8080"
+	      sh "kubectl expose deployment jenkins-auth --type=LoadBalancer --port=8081"
+	    }
+	  }
+    }
+
+    stage("Production Deployment View"){
+        sh "kubectl get deployments"
+        sh "kubectl get pods"
+        sh "kubectl get services"
     }
 }

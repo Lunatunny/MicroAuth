@@ -35,7 +35,7 @@ node {
 	      stage("Get DATA Kubernetes IP") {
 
             
-                script {
+                
                 def userInput = input(
                  id: 'userInput', message: 'Enter the Kubernetes IP of the DATA SERVICE', 
                  parameters: [
@@ -43,7 +43,7 @@ node {
                 ])
                 echo ("Dataservice IP: "+userInput['API_HOST'])
 
-                }
+                
             
              }
 		stage('Deploy to Kubenetes cluster - AuthApi') {

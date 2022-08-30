@@ -12,7 +12,7 @@ node {
     }
     
     stage ("Containerize the app-docker build - AuthApi") {
-        sh 'docker build --rm -t jenkins-auth:v1.0 .'
+        sh 'docker build --rm -t jenkins-auth:v1.0 MicroAuth/.'
     }
     
     stage ("Inspect the docker image - AuthApi"){

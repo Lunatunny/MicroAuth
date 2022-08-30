@@ -1,14 +1,14 @@
 node {
     stage ("Checkout AuthApi"){
-        git branch: 'main', url: ' https://github.com/foxwas/bahmsdfox-msdauthservice'
+        git branch: 'main', url: 'https://github.com/Lunatunny/MicroAuth.git'
     }
 
     stage ("Gradle Build - AuthApi") {
-        sh 'gradle clean build -b ./Micro'
+        sh 'gradle clean build -b ./MicroAuth'
     }
     
     stage ("Gradle Bootjar-Package - AuthApi") {
-        sh 'gradle bootjar -b ./Micro'
+        sh 'gradle bootjar -b ./MicroAuth'
     }
     
     stage ("Containerize the app-docker build - AuthApi") {

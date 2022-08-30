@@ -33,19 +33,6 @@ node {
 	
 	  if(response=="Yes") {
 	      stage("Get DATA Kubernetes IP") {
-
-            
-                
-                def userInput = input(
-                 id: 'userInput', message: 'Enter the Kubernetes IP of the DATA SERVICE', 
-                 parameters: [
-                 [$class: 'TextParameterDefinition', defaultValue: '0.0.0.0:0000', description: 'IP of DATA SERVICE in Kubernetes', name: 'API_HOST']
-                ])
-                echo ("Dataservice IP: "+userInput['API_HOST'])
-
-                
-            
-             }
 		stage('Deploy to Kubenetes cluster - AuthApi') {
 	      sh "kubectl create deployment jenkins-auth --image=jenkins-auth:v1.0"
 		//get the value of API_HOST from kubernetes services and set the env variable

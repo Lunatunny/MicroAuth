@@ -39,7 +39,8 @@ node {
 	      sh "kubectl set env deployment/jenkins-auth API_HOST="+userInput['API_HOST']
 	      sh "kubectl expose deployment jenkins-auth --type=LoadBalancer --port=8081"
 	    }
-	  }
+	}
+      }
     }
 
     stage("Production Deployment View"){
